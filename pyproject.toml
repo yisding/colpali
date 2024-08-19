@@ -23,7 +23,6 @@ classifiers = [
 dependencies = [
     "torch>=2.2.0",
     "transformers>=4.41.1",
-    "mteb>=1.12.22",
     "requests",
     "GPUtil",
     "peft>=0.11.0, <0.12.0",

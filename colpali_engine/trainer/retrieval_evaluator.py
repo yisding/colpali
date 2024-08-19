@@ -1,11 +1,9 @@
 import torch
-from mteb.evaluation.evaluators import RetrievalEvaluator
 
 
 class CustomEvaluator:
     def __init__(self, is_multi_vector=False):
         self.is_multi_vector = is_multi_vector
-        self.mteb_evaluator = RetrievalEvaluator()
 
     def evaluate(self, qs, ps):
         if self.is_multi_vector:
@@ -24,26 +22,6 @@ class CustomEvaluator:
         # cast to numpy
         # scores = scores.cpu().numpy()
         scores = scores.to(torch.float32).cpu().numpy()
-        return scores
-
-    def compute_metrics(self, relevant_docs, results, **kwargs):
-        # wrap mteb package
-
-        ndcg, _map, recall, precision, naucs = self.mteb_evaluator.evaluate(
-            relevant_docs,
-            results,
-            self.mteb_evaluator.k_values,
-            ignore_identical_ids=kwargs.get("ignore_identical_ids", True),
-        )
-        mrr = self.mteb_evaluator.evaluate_custom(relevant_docs, results, self.mteb_evaluator.k_values, "mrr")
-        scores = {
-            **{f"ndcg_at_{k.split('@')[1]}": v for (k, v) in ndcg.items()},
-            **{f"map_at_{k.split('@')[1]}": v for (k, v) in _map.items()},
-            **{f"recall_at_{k.split('@')[1]}": v for (k, v) in recall.items()},
-            **{f"precision_at_{k.split('@')[1]}": v for (k, v) in precision.items()},
-            **{f"mrr_at_{k.split('@')[1]}": v for (k, v) in mrr[0].items()},
-            **{f"naucs_at_{k.split('@')[1]}": v for (k, v) in naucs.items()},
-        }
         return scores
 
     def evaluate_colbert(self, qs, ps, batch_size=128) -> torch.Tensor:
